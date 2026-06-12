@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import torch
 from PIL import Image
 import io
+import os
+import gdown
 from torchvision import transforms
 from transformers import AutoTokenizer
 from test2 import MultimodalClassifier
@@ -18,10 +20,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- AUTO-DOWNLOAD MODEL WEIGHTS FROM GOOGLE DRIVE ---
+# Dynamically resolves path so it works perfectly in cloud environment containers
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "best_multimodal_model (1).pth")
+
+# ⚠️ PLACE YOUR GOOGLE DRIVE FILE ID IN THE STRING BELOW
+GOOGLE_DRIVE_LINK = "https://drive.google.com/file/d/1htEDPHuBfNQmyjexrgXOHmY02uWiADoL/view?usp=sharing"
+
+if not os.path.exists(MODEL_PATH):
+    print("🤖 Model weights not found locally. Downloading from Google Drive...")
+    try:
+        gdown.download(GOOGLE_DRIVE_LINK, MODEL_PATH, quiet=False)
+        print("✅ Model weights downloaded successfully!")
+    except Exception as e:
+        print(f"❌ Failed to download model weights: {e}")
+# -----------------------------------------------------
+
 # Load the model weights onto the available hardware (GPU or CPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = MultimodalClassifier()
-model.load_state_dict(torch.load("best_multimodal_model (1).pth", map_location=device))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.to(device)
 model.eval()
 
@@ -70,4 +88,5 @@ async def predict(headline_text: str = Form(""), image_file: UploadFile = File(N
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # Changed host to 0.0.0.0 for external exposure in deployment environments
+    uvicorn.run(app, host="0.0.0.0", port=8000)
