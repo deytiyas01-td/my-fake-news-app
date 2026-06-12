@@ -47,7 +47,7 @@ opencv-python==4.13.0.92
 opt_einsum==3.4.0
 optree==0.19.1
 packaging==26.2
-pandas==3.0.3
+pandas>=2.0.0
 pillow==12.2.0
 protobuf==4.25.9
 pyasn1==0.6.3
