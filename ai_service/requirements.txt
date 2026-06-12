@@ -64,7 +64,7 @@ requests==2.34.2
 requests-oauthlib==2.0.0
 rich==15.0.0
 safetensors==0.7.0
-scikit-learn==1.8.0
+scikit-learn>=1.5.0,<1.6.0
 scipy==1.17.1
 sentence-transformers==5.5.1
 shellingham==1.5.4
